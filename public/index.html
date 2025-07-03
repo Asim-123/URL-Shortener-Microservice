@@ -34,11 +34,14 @@
 
             <div id="result" class="result-container" style="display: none;">
                 <div class="result-card">
-                    <h3>Your shortened URL: <span id="shortUrlDisplay"> </span></h3>
+                    <h3>Your shortened URL:</h3>
                     <div class="short-url-display">
                         <input type="text" id="shortUrlDisplay" readonly>
                         <button id="copyBtn" class="copy-btn">
                             <i class="fas fa-copy"></i> Copy
+                        </button>
+                        <button id="testRedirectBtn" class="test-redirect-btn">
+                            <i class="fas fa-external-link-alt"></i> Test Redirect
                         </button>
                     </div>
                     <div class="original-url">
@@ -87,7 +90,7 @@
                     <div class="api-example">
                         <h4>Redirect to Original:</h4>
                         <code>GET /api/shorturl/1</code>
-                        <p>Redirects to the original URL</p>
+                        <p>Returns 302 redirect to the original URL</p>
                     </div>
                 </div>
             </div>

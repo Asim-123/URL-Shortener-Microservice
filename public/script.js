@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const shortUrlDisplay = document.getElementById('shortUrlDisplay');
     const originalUrlDisplay = document.getElementById('originalUrlDisplay');
     const copyBtn = document.getElementById('copyBtn');
+    const testRedirectBtn = document.getElementById('testRedirectBtn');
     const errorMessage = document.getElementById('errorMessage');
 
     // Form submission handler
@@ -64,6 +65,38 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Test redirect button handler
+    testRedirectBtn.addEventListener('click', async function() {
+        const shortUrl = shortUrlDisplay.value;
+        
+        if (!shortUrl) {
+            showError('No short URL to test');
+            return;
+        }
+
+        // Show testing state
+        setTestingState(true);
+
+        try {
+            const response = await fetch(shortUrl, {
+                method: 'GET',
+                redirect: 'manual' // Don't follow redirects
+            });
+
+            if (response.status === 302) {
+                const location = response.headers.get('location');
+                showRedirectInfo(location);
+            } else {
+                showError(`Expected 302 redirect, got ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Error testing redirect:', error);
+            showError('Failed to test redirect');
+        } finally {
+            setTestingState(false);
+        }
+    });
+
     // Helper functions
     function setLoadingState(loading) {
         if (loading) {
@@ -72,6 +105,18 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-cut"></i> Shorten URL';
+        }
+    }
+
+    function setTestingState(testing) {
+        if (testing) {
+            testRedirectBtn.disabled = true;
+            testRedirectBtn.classList.add('testing');
+            testRedirectBtn.innerHTML = '<span class="loading"></span> Testing...';
+        } else {
+            testRedirectBtn.disabled = false;
+            testRedirectBtn.classList.remove('testing');
+            testRedirectBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Test Redirect';
         }
     }
 
@@ -113,6 +158,35 @@ document.addEventListener('DOMContentLoaded', function() {
             copyBtn.innerHTML = originalText;
             copyBtn.classList.remove('copied');
         }, 2000);
+    }
+
+    function showRedirectInfo(location) {
+        // Create a temporary success message
+        const successDiv = document.createElement('div');
+        successDiv.className = 'redirect-success';
+        successDiv.innerHTML = `
+            <div class="redirect-info">
+                <i class="fas fa-check-circle"></i>
+                <div>
+                    <strong>Redirect Test Successful!</strong>
+                    <p>This URL redirects to: <a href="${location}" target="_blank">${location}</a></p>
+                </div>
+            </div>
+        `;
+        
+        // Insert after the result container
+        const resultContainer = document.getElementById('result');
+        resultContainer.parentNode.insertBefore(successDiv, resultContainer.nextSibling);
+        
+        // Scroll to the success message
+        successDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        
+        // Remove after 5 seconds
+        setTimeout(() => {
+            if (successDiv.parentNode) {
+                successDiv.parentNode.removeChild(successDiv);
+            }
+        }, 5000);
     }
 
     function fallbackCopyTextToClipboard(text) {
