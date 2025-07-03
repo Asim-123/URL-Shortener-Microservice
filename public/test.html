@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test Page</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>URL Shortener API Test</h1>
+    
+    <div class="test">
+        <h3>Test 1: Create Short URL</h3>
+        <button onclick="testCreateUrl()">Test POST /api/shorturl</button>
+        <div id="result1"></div>
+    </div>
+
+    <div class="test">
+        <h3>Test 2: Test Redirect</h3>
+        <button onclick="testRedirect()">Test GET /api/shorturl/1</button>
+        <div id="result2"></div>
+    </div>
+
+    <div class="test">
+        <h3>Test 3: Test Invalid URL</h3>
+        <button onclick="testInvalidUrl()">Test Invalid URL</button>
+        <div id="result3"></div>
+    </div>
+
+    <div class="test">
+        <h3>Test 4: Test http://www.example.com format</h3>
+        <button onclick="testExampleFormat()">Test Example Format</button>
+        <div id="result4"></div>
+    </div>
+
+    <script>
+        let lastShortUrl = null;
+
+        async function testCreateUrl() {
+            const resultDiv = document.getElementById('result1');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch('/api/shorturl', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: 'https://freeCodeCamp.org' })
+                });
+
+                const data = await response.json();
+                lastShortUrl = data.short_url;
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <strong>✅ PASSED</strong><br>
+                        Status: ${response.status}<br>
+                        Response: <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <strong>❌ FAILED</strong><br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function testRedirect() {
+            const resultDiv = document.getElementById('result2');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const shortUrl = lastShortUrl || 1;
+                const response = await fetch(`/api/shorturl/${shortUrl}`, {
+                    method: 'GET',
+                    redirect: 'manual'
+                });
+
+                const location = response.headers.get('location');
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <strong>✅ PASSED</strong><br>
+                        Status: ${response.status}<br>
+                        Location: ${location}<br>
+                        Expected: 302 redirect
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <strong>❌ FAILED</strong><br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function testInvalidUrl() {
+            const resultDiv = document.getElementById('result3');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch('/api/shorturl', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: 'invalid-url' })
+                });
+
+                const data = await response.json();
+                
+                if (data.error === 'invalid url') {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <strong>✅ PASSED</strong><br>
+                            Status: ${response.status}<br>
+                            Response: <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <strong>❌ FAILED</strong><br>
+                            Expected: {"error": "invalid url"}<br>
+                            Got: <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <strong>❌ FAILED</strong><br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        async function testExampleFormat() {
+            const resultDiv = document.getElementById('result4');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch('/api/shorturl', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: 'http://www.example.com' })
+                });
+
+                const data = await response.json();
+                
+                if (data.original_url && data.short_url) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <strong>✅ PASSED</strong><br>
+                            Status: ${response.status}<br>
+                            Response: <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <strong>❌ FAILED</strong><br>
+                            Expected: original_url and short_url properties<br>
+                            Got: <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <strong>❌ FAILED</strong><br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html> 
