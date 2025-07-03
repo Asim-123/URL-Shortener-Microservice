@@ -4,6 +4,47 @@ const validUrl = require('valid-url');
 let urls = [];
 let counter = 0;
 
+// Helper function to parse request body
+function parseBody(event) {
+  const contentType = event.headers['content-type'] || event.headers['Content-Type'] || '';
+  
+  if (!event.body || event.body.trim() === '') {
+    return null;
+  }
+
+  // Handle JSON
+  if (contentType.includes('application/json')) {
+    try {
+      return JSON.parse(event.body);
+    } catch (error) {
+      throw new Error(`Invalid JSON: ${error.message}`);
+    }
+  }
+
+  // Handle form data
+  if (contentType.includes('application/x-www-form-urlencoded')) {
+    const params = new URLSearchParams(event.body);
+    return { url: params.get('url') };
+  }
+
+  // Handle multipart form data
+  if (contentType.includes('multipart/form-data')) {
+    // For multipart, we'll try to extract the URL from the body
+    // This is a simplified approach - in production you might want a proper multipart parser
+    const urlMatch = event.body.match(/name="url"\s*\r?\n\r?\n([^\r\n]+)/);
+    if (urlMatch) {
+      return { url: urlMatch[1] };
+    }
+  }
+
+  // Default: try to parse as JSON
+  try {
+    return JSON.parse(event.body);
+  } catch (error) {
+    throw new Error(`Unable to parse request body. Expected JSON or form data.`);
+  }
+}
+
 exports.handler = async (event, context) => {
   // CORS headers
   const headers = {
@@ -24,12 +65,50 @@ exports.handler = async (event, context) => {
   }
 
   console.log('Request:', event.httpMethod, path);
+  console.log('Headers:', event.headers);
+  console.log('Body:', event.body);
 
   // POST /api/shorturl
   if (event.httpMethod === 'POST' && path === '/api/shorturl') {
     try {
-      const body = JSON.parse(event.body);
+      // Check if body exists and is not empty
+      if (!event.body || event.body.trim() === '') {
+        console.log('Empty body received');
+        return {
+          statusCode: 400,
+          headers: { ...headers, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ error: 'Request body is required' }),
+        };
+      }
+
+      let body;
+      try {
+        body = parseBody(event);
+      } catch (parseError) {
+        console.log('Parse error:', parseError.message);
+        console.log('Raw body:', event.body);
+        return {
+          statusCode: 400,
+          headers: { ...headers, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            error: 'Invalid request format',
+            details: parseError.message,
+            received: event.body.substring(0, 100) + '...'
+          }),
+        };
+      }
+
       const { url } = body;
+
+      // Check if url property exists
+      if (!url) {
+        console.log('No URL provided in request body');
+        return {
+          statusCode: 400,
+          headers: { ...headers, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ error: 'URL is required in request body' }),
+        };
+      }
 
       console.log('Received URL:', url);
 
@@ -74,11 +153,14 @@ exports.handler = async (event, context) => {
         }),
       };
     } catch (error) {
-      console.log('JSON parse error:', error);
+      console.log('Unexpected error:', error);
       return {
-        statusCode: 400,
+        statusCode: 500,
         headers: { ...headers, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: 'Invalid JSON' }),
+        body: JSON.stringify({ 
+          error: 'Server error',
+          details: error.message
+        }),
       };
     }
   }
