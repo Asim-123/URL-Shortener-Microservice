@@ -33,8 +33,9 @@ exports.handler = async (event, context) => {
 
       console.log('Received URL:', url);
 
-      // Check if URL is valid
-      if (!validUrl.isUri(url)) {
+      // Check if URL is valid (custom validation to preserve case)
+      const urlPattern = /^https?:\/\/[^\s/$.?#].[^\s]*$/i;
+      if (!urlPattern.test(url)) {
         console.log('Invalid URL detected:', url);
         return {
           statusCode: 200,
@@ -43,8 +44,8 @@ exports.handler = async (event, context) => {
         };
       }
 
-      // Check if URL already exists
-      const existing = urls.find(u => u.original_url === url);
+      // Check if URL already exists (case-insensitive comparison)
+      const existing = urls.find(u => u.original_url.toLowerCase() === url.toLowerCase());
       if (existing) {
         console.log('URL already exists:', existing);
         return {
