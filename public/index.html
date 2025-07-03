@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener Microservice</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-link"></i> URL Shortener Microservice</h1>
+            <p>Shorten your URLs with ease</p>
+        </header>
+
+        <main>
+            <div class="url-form-container">
+                <form id="urlForm" class="url-form">
+                    <div class="input-group">
+                        <input 
+                            type="url" 
+                            id="urlInput" 
+                            placeholder="Enter a URL to shorten (e.g., https://www.example.com)" 
+                            required
+                        >
+                        <button type="submit" id="submitBtn">
+                            <i class="fas fa-cut"></i> Shorten URL
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="result" class="result-container" style="display: none;">
+                <div class="result-card">
+                    <h3>Your shortened URL:</h3>
+                    <div class="short-url-display">
+                        <input type="text" id="shortUrlDisplay" readonly>
+                        <button id="copyBtn" class="copy-btn">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <div class="original-url">
+                        <strong>Original URL:</strong>
+                        <span id="originalUrlDisplay"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="error" class="error-container" style="display: none;">
+                <div class="error-card">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="errorMessage"></span>
+                </div>
+            </div>
+
+            <div class="features">
+                <h3>How it works:</h3>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-edit"></i>
+                        <h4>1. Enter URL</h4>
+                        <p>Paste your long URL in the input field above</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-magic"></i>
+                        <h4>2. Get Short URL</h4>
+                        <p>Click "Shorten URL" to generate a short link</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-share"></i>
+                        <h4>3. Share & Use</h4>
+                        <p>Copy and share your shortened URL anywhere</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="api-info">
+                <h3>API Usage:</h3>
+                <div class="api-examples">
+                    <div class="api-example">
+                        <h4>Create Short URL:</h4>
+                        <code>POST /api/shorturl</code>
+                        <p>Body: {"url": "https://www.example.com"}</p>
+                    </div>
+                    <div class="api-example">
+                        <h4>Redirect to Original:</h4>
+                        <code>GET /api/shorturl/1</code>
+                        <p>Redirects to the original URL</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 URL Shortener Microservice. Built with Node.js, Express, and MongoDB.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
