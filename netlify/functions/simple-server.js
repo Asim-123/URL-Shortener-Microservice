@@ -199,7 +199,8 @@ exports.handler = async (event, context) => {
       headers: { 
         ...headers, 
         'Location': url.original_url,
-        'Cache-Control': 'no-cache'
+        'Cache-Control': 'no-cache',
+        'X-Original-URL': url.original_url
       },
       body: '',
     };
