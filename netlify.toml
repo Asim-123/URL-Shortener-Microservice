@@ -6,6 +6,10 @@
 [build.environment]
   NODE_VERSION = "18"
 
+# Clear cache for functions
+[build.processing]
+  skip_processing = false
+
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/api/:splat"
@@ -15,4 +19,8 @@
 [[redirects]]
   from = "/*"
   to = "/index.html"
-  status = 200 
+  status = 200
+
+# Add function-specific settings
+[functions]
+  node_bundler = "esbuild" 

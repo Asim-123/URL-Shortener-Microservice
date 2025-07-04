@@ -1,5 +1,6 @@
 // In-memory storage (in production, use a database)
 // Note: This will reset on function cold starts, but for testing we'll use a simple approach
+// Last updated: 2024-01-27
 let urlDatabase = [];
 let urlCounter = 1;
 
