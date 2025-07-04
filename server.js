@@ -3,6 +3,7 @@ const cors = require('cors');
 const validUrl = require('valid-url');
 const dns = require('dns');
 const { promisify } = require('util');
+const e = require('express');
 require('dotenv').config();
 
 // Promisify dns.lookup for async/await usage
@@ -107,9 +108,8 @@ app.get('/api/shorturl/:short_url', async (req, res) => {
     }
     
     // Redirect to the original URL
-   const redirect = res.redirect(url.original_url);
-   res.send(redirect);
-   console.log(redirect);
+    res.send(url.original_url);
+    res.redirect(url.original_url);
   } catch (error) {
     console.error('Error redirecting:', error);
     res.status(500).json({ error: 'No short URL found for the given input' });
