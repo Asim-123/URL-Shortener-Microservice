@@ -68,14 +68,10 @@ app.post('/api/shorturl', async (req, res) => {
 
 // Redirect endpoint for short URLs
 app.get('/api/shorturl/:short_url', async (req, res) => {
-    const shortUrl = parseInt(req.params.short_url);
-
-    if (isNaN(shortUrl)) {
-        return res.status(400).json({ error: 'Invalid short URL format' });
-    }
+    const shortUrl = req.params.short_url;
 
     const urlEntry = await urlsCollection.findOne({ short_url: shortUrl });
-
+    
     if (urlEntry) {
         res.status(302).redirect(urlEntry.original_url);
     } else {
