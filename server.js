@@ -106,7 +106,8 @@ app.get('/api/shorturl/:short_url', async (req, res) => {
       return res.status(404).json({ error: 'Short URL not found' });
     }
     
-    res.redirect(url.original_url);
+    // Instead of redirecting, return the original_url in JSON (to match freeCodeCamp example)
+    res.json({ original_url: url.original_url });
     
   } catch (error) {
     console.error('Error redirecting:', error);
