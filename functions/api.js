@@ -19,7 +19,8 @@ exports.handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Content-Type': 'application/json'
   };
 
   // Debug logging (commented out for production)
@@ -164,13 +165,15 @@ exports.handler = async (event, context) => {
       const urlEntry = urlDatabase.find(entry => entry.short_url === shortUrl);
   
       if (urlEntry) {
+        // Return the original URL information instead of redirecting
+        // This prevents CORS issues when the browser tries to follow redirects to external URLs
         return {
-          statusCode: 302,
-          headers: {
-            ...headers,
-            'Location': urlEntry.original_url
-          },
-          body: ''
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({
+            original_url: urlEntry.original_url,
+            short_url: urlEntry.short_url
+          })
         };
       } else {
         return {

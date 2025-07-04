@@ -1,3 +1,29 @@
+// Handle short URL redirects
+async function handleShortUrlRedirect(shortUrlPath) {
+    try {
+        const response = await fetch(`/api/shorturl/${shortUrlPath}`);
+        const data = await response.json();
+        
+        if (data.error) {
+            alert('Error: ' + data.error);
+        } else {
+            // Redirect to the original URL
+            window.location.href = data.original_url;
+        }
+    } catch (error) {
+        console.error('Error fetching short URL:', error);
+        alert('An error occurred while processing the short URL');
+    }
+}
+
+// Check if current page is a short URL and handle redirect
+const path = window.location.pathname;
+const shortUrlMatch = path.match(/^\/api\/shorturl\/(\d+)$/);
+if (shortUrlMatch) {
+    const shortUrlId = shortUrlMatch[1];
+    handleShortUrlRedirect(shortUrlId);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const urlForm = document.getElementById('urlForm');
     const urlInput = document.getElementById('urlInput');
