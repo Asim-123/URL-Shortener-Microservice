@@ -170,7 +170,7 @@ exports.handler = async (event, context) => {
             ...headers,
             'Location': urlEntry.original_url
           },
-          body: ''
+          body: urlEntry.original_url
         };
       } else {
         return {
