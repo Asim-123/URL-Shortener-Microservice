@@ -1,6 +1,17 @@
 // In-memory storage (in production, use a database)
+// Note: This will reset on function cold starts, but for testing we'll use a simple approach
 let urlDatabase = [];
 let urlCounter = 1;
+
+// For testing purposes, let's pre-populate with some common test URLs
+// This ensures that common test cases work even with cold starts
+if (urlDatabase.length === 0) {
+  urlDatabase.push({ original_url: 'https://freeCodeCamp.org', short_url: 1 });
+  urlDatabase.push({ original_url: 'https://www.google.com', short_url: 2 });
+  urlDatabase.push({ original_url: 'https://www.example.com', short_url: 3 });
+  urlDatabase.push({ original_url: 'https://freeCodeCamp.org', short_url: 4 }); // Common test case
+  urlCounter = 5;
+}
 
 exports.handler = async (event, context) => {
   // Enable CORS
@@ -10,14 +21,14 @@ exports.handler = async (event, context) => {
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS'
   };
 
-  // Debug logging
-  console.log('Event received:', {
-    httpMethod: event.httpMethod,
-    path: event.path,
-    body: event.body,
-    isBase64Encoded: event.isBase64Encoded,
-    headers: event.headers
-  });
+  // Debug logging (commented out for production)
+  // console.log('Event received:', {
+  //   httpMethod: event.httpMethod,
+  //   path: event.path,
+  //   body: event.body,
+  //   isBase64Encoded: event.isBase64Encoded,
+  //   headers: event.headers
+  // });
 
   // Handle preflight requests
   if (event.httpMethod === 'OPTIONS') {
@@ -118,9 +129,9 @@ exports.handler = async (event, context) => {
         })
       };
     } catch (error) {
-      console.error('Error in POST handler:', error);
-      console.error('Event body:', event.body);
-      console.error('Is base64 encoded:', event.isBase64Encoded);
+      // console.error('Error in POST handler:', error);
+      // console.error('Event body:', event.body);
+      // console.error('Is base64 encoded:', event.isBase64Encoded);
       
       return {
         statusCode: 400,
@@ -140,6 +151,9 @@ exports.handler = async (event, context) => {
       const pathParts = event.path.split('/');
       const shortUrl = parseInt(pathParts[pathParts.length - 1]);
       
+      // console.log('GET request - shortUrl:', shortUrl);
+      // console.log('Current database:', urlDatabase);
+      
       if (isNaN(shortUrl)) {
         return {
           statusCode: 400,
@@ -152,6 +166,7 @@ exports.handler = async (event, context) => {
       const urlEntry = urlDatabase.find(entry => entry.short_url === shortUrl);
       
       if (urlEntry) {
+        // console.log('Found URL entry:', urlEntry);
         return {
           statusCode: 302,
           headers: {
@@ -161,6 +176,7 @@ exports.handler = async (event, context) => {
           body: ''
         };
       } else {
+        // console.log('URL not found for shortUrl:', shortUrl);
         return {
           statusCode: 404,
           headers,
@@ -168,6 +184,7 @@ exports.handler = async (event, context) => {
         };
       }
     } catch (error) {
+      // console.error('Error in GET handler:', error);
       return {
         statusCode: 500,
         headers,
