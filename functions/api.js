@@ -165,16 +165,29 @@ exports.handler = async (event, context) => {
       const urlEntry = urlDatabase.find(entry => entry.short_url === shortUrl);
   
       if (urlEntry) {
-        // Return the original URL information instead of redirecting
-        // This prevents CORS issues when the browser tries to follow redirects to external URLs
-        return {
-          statusCode: 200,
-          headers,
-          body: JSON.stringify({
-            original_url: urlEntry.original_url,
-            short_url: urlEntry.short_url
-          })
-        };
+        // Check Accept header to determine response type
+        const acceptHeader = event.headers['accept'] || '';
+        if (acceptHeader.includes('application/json')) {
+          // Return JSON for API/fetch requests
+          return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({
+              original_url: urlEntry.original_url,
+              short_url: urlEntry.short_url
+            })
+          };
+        } else {
+          // Return 302 redirect for browser navigation (test requirement)
+          return {
+            statusCode: 302,
+            headers: {
+              ...headers,
+              'Location': urlEntry.original_url
+            },
+            body: ''
+          };
+        }
       } else {
         return {
           statusCode: 404,

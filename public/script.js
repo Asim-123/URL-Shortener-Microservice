@@ -1,7 +1,11 @@
 // Handle short URL redirects
 async function handleShortUrlRedirect(shortUrlPath) {
     try {
-        const response = await fetch(`/api/shorturl/${shortUrlPath}`);
+        const response = await fetch(`/api/shorturl/${shortUrlPath}`, {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
         const data = await response.json();
         
         if (data.error) {
