@@ -165,15 +165,12 @@ exports.handler = async (event, context) => {
   
       if (urlEntry) {
         return {
-          statusCode: 301,
+          statusCode: 302,
           headers: {
             ...headers,
             'Location': urlEntry.original_url
           },
-          body: JSON.stringify({
-            original_url: urlEntry.original_url,
-            short_url: urlEntry.short_url
-          })
+          body: ''
         };
       } else {
         return {
