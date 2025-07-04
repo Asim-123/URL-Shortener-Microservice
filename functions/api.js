@@ -1,6 +1,8 @@
-// In-memory storage (in production, use a database)
-// Note: This will reset on function cold starts, but for testing we'll use a simple approach
-// Last updated: 2024-01-27
+const { MongoClient } = require('mongodb');
+
+const uri = 'your_mongodb_connection_string'; // Replace with your MongoDB connection string
+const client = new MongoClient(uri);
+
 let urlDatabase = [];
 let urlCounter = 1;
 
@@ -15,6 +17,10 @@ if (urlDatabase.length === 0) {
 }
 
 exports.handler = async (event, context) => {
+  await client.connect();
+  const database = client.db('urlShortener');
+  const urlsCollection = database.collection('urls');
+
   // Enable CORS
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -99,8 +105,8 @@ exports.handler = async (event, context) => {
         };
       }
       
-      // Check if URL already exists
-      const existingUrl = urlDatabase.find(entry => entry.original_url === url);
+      // Check if URL already exists in the database
+      const existingUrl = await urlsCollection.findOne({ original_url: url });
       if (existingUrl) {
         return {
           statusCode: 200,
@@ -119,7 +125,7 @@ exports.handler = async (event, context) => {
         short_url: shortUrl
       };
       
-      urlDatabase.push(newEntry);
+      await urlsCollection.insertOne(newEntry);
       urlCounter++;
       
       return {
@@ -161,8 +167,8 @@ exports.handler = async (event, context) => {
         };
       }
   
-      // Find URL entry
-      const urlEntry = urlDatabase.find(entry => entry.short_url === shortUrl);
+      // Find URL entry in the database
+      const urlEntry = await urlsCollection.findOne({ short_url: shortUrl });
   
       if (urlEntry) {
         // Check Accept header to determine response type
