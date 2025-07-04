@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener Microservice</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>URL Shortener Microservice</h1>
+            <p>Shorten your URLs with ease</p>
+        </header>
+        
+        <main>
+            <div class="form-container">
+                <form id="urlForm">
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            id="urlInput" 
+                            placeholder="Enter URL to shorten (e.g., https://www.example.com)"
+                            required
+                        >
+                        <button type="submit" id="submitBtn">Shorten URL</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="result-container" id="resultContainer" style="display: none;">
+                <h3>Your shortened URL:</h3>
+                <div class="result-box">
+                    <input type="text" id="resultUrl" readonly>
+                    <button id="copyBtn" onclick="copyToClipboard()">Copy</button>
+                </div>
+                <div class="original-url">
+                    <strong>Original URL:</strong> <span id="originalUrl"></span>
+                </div>
+            </div>
+            
+            <div class="error-container" id="errorContainer" style="display: none;">
+                <div class="error-message">
+                    <span id="errorText"></span>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <h3>API Usage:</h3>
+            <div class="api-examples">
+                <div class="api-example">
+                    <h4>POST /api/shorturl</h4>
+                    <p>Send a POST request with the URL to shorten:</p>
+                    <code>{"url": "https://www.example.com"}</code>
+                </div>
+                <div class="api-example">
+                    <h4>GET /api/shorturl/:short_url</h4>
+                    <p>Visit the short URL to redirect to the original URL</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html> 
