@@ -8,3 +8,5 @@ node_modules/
 .env.local
 
 # Ignore all files in the .env.development.local directory  
+# Local Netlify folder
+.netlify

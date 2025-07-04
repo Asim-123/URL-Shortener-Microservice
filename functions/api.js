@@ -1,20 +1,9 @@
 const { MongoClient } = require('mongodb');
 
-const uri = 'your_mongodb_connection_string'; // Replace with your MongoDB connection string
+const uri = 'mongodb+srv://root:root@cluster0.ev1okht.mongodb.net/micro'; // Replace with your MongoDB connection string
 const client = new MongoClient(uri);
 
-let urlDatabase = [];
-let urlCounter = 1;
-
-// For testing purposes, let's pre-populate with some common test URLs
-// This ensures that common test cases work even with cold starts
-if (urlDatabase.length === 0) {
-  urlDatabase.push({ original_url: 'https://freeCodeCamp.org', short_url: 1 });
-  urlDatabase.push({ original_url: 'https://www.google.com', short_url: 2 });
-  urlDatabase.push({ original_url: 'https://www.example.com', short_url: 3 });
-  urlDatabase.push({ original_url: 'https://freeCodeCamp.org', short_url: 4 }); // Common test case
-  urlCounter = 5;
-}
+// MongoDB will handle the data persistence
 
 exports.handler = async (event, context) => {
   await client.connect();
@@ -118,15 +107,16 @@ exports.handler = async (event, context) => {
         };
       }
       
-      // Create new short URL
-      const shortUrl = urlCounter;
+      // Create new short URL - get the next available short_url
+      const lastEntry = await urlsCollection.findOne({}, { sort: { short_url: -1 } });
+      const shortUrl = lastEntry ? lastEntry.short_url + 1 : 1;
+      
       const newEntry = {
         original_url: url,
         short_url: shortUrl
       };
       
       await urlsCollection.insertOne(newEntry);
-      urlCounter++;
       
       return {
         statusCode: 200,
@@ -156,7 +146,13 @@ exports.handler = async (event, context) => {
   if (event.httpMethod === 'GET') {
     try {
       // Extract short_url from path and handle query parameters
-      const path = event.path.replace('/api/shorturl/', '');
+      let path = event.path;
+      // Handle both Netlify dev server and production paths
+      if (path.includes('/.netlify/functions/api/shorturl/')) {
+        path = path.replace('/.netlify/functions/api/shorturl/', '');
+      } else if (path.includes('/api/shorturl/')) {
+        path = path.replace('/api/shorturl/', '');
+      }
       const shortUrl = parseInt(path.split('/')[0]); // Get first part after base path
   
       if (isNaN(shortUrl)) {

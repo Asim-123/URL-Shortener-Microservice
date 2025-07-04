@@ -10,8 +10,6 @@ const PORT = process.env.PORT || 3002;
 const uri = 'mongodb+srv://root:root@cluster0.ev1okht.mongodb.net/micro'; // Replace with your MongoDB connection string
 const client = new MongoClient(uri);
 
-let urlDatabase = [];
-let urlCounter = 1;
 let database, urlsCollection;
 
 // Middleware
@@ -51,15 +49,16 @@ app.post('/api/shorturl', async (req, res) => {
         });
     }
 
-    // Create new short URL
-    const shortUrl = urlCounter;
+    // Create new short URL - get the next available short_url
+    const lastEntry = await urlsCollection.findOne({}, { sort: { short_url: -1 } });
+    const shortUrl = lastEntry ? lastEntry.short_url + 1 : 1;
+    
     const newEntry = {
         original_url: url,
         short_url: shortUrl
     };
 
     await urlsCollection.insertOne(newEntry);
-    urlCounter++;
 
     res.json({
         original_url: url,
