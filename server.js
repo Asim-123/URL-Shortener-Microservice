@@ -103,14 +103,16 @@ app.get('/api/shorturl/:short_url', async (req, res) => {
     const url = urls.find(u => u.short_url === shortUrl);
     
     if (!url) {
-      return res.status(404).json({ error: 'Short URL not found' });
+      return res.status(404).json({ error: 'No short URL found for the given input' });
     }
     
     // Redirect to the original URL
-    res.redirect(200, url.original_url);
+   const redirect = res.redirect(url.original_url);
+   res.send(redirect);
+   console.log(redirect);
   } catch (error) {
     console.error('Error redirecting:', error);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'No short URL found for the given input' });
   }
 });
 
