@@ -58,21 +58,21 @@ app.post('/api/shorturl', (req, res) => {
 
 // Redirect endpoint for short URLs
 // Redirect endpoint for short URLs
-app.get('/api/shorturl/:short_url', (req, res) => {
-    const shortUrl = parseInt(req.params.short_url);
+// app.get('/api/shorturl/:short_url', (req, res) => {
+//     const shortUrl = parseInt(req.params.short_url);
 
-    if (isNaN(shortUrl)) {
-        return res.status(400).json({ error: 'Invalid short URL format' });
-    }
+//     if (isNaN(shortUrl)) {
+//         return res.status(400).json({ error: 'Invalid short URL format' });
+//     }
 
-    const urlEntry = urlDatabase.find(entry => entry.short_url === shortUrl);
+//     const urlEntry = urlDatabase.find(entry => entry.short_url === shortUrl);
 
-    if (urlEntry) {
-        res.send(urlEntry.original_url);
-    } else {
-        return res.status(404).json({ error: 'Short URL not found' });
-    }
-});
+//     if (urlEntry) {
+//         res.send(urlEntry.original_url);
+//     } else {
+//         return res.status(404).json({ error: 'Short URL not found' });
+//     }
+// });
 // Start server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
