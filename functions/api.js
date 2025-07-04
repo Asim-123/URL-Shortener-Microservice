@@ -147,13 +147,10 @@ exports.handler = async (event, context) => {
   // Handle GET request (redirect)
   if (event.httpMethod === 'GET') {
     try {
-      // Extract short_url from path
-      const pathParts = event.path.split('/');
-      const shortUrl = parseInt(pathParts[pathParts.length - 1]);
-      
-      // console.log('GET request - shortUrl:', shortUrl);
-      // console.log('Current database:', urlDatabase);
-      
+      // Extract short_url from path and handle query parameters
+      const path = event.path.replace('/api/shorturl/', '');
+      const shortUrl = parseInt(path.split('/')[0]); // Get first part after base path
+  
       if (isNaN(shortUrl)) {
         return {
           statusCode: 400,
@@ -161,12 +158,11 @@ exports.handler = async (event, context) => {
           body: JSON.stringify({ error: 'Invalid short URL' })
         };
       }
-      
-      // Find the URL entry
+  
+      // Find URL entry
       const urlEntry = urlDatabase.find(entry => entry.short_url === shortUrl);
-      
+  
       if (urlEntry) {
-        // console.log('Found URL entry:', urlEntry);
         return {
           statusCode: 302,
           headers: {
@@ -176,7 +172,6 @@ exports.handler = async (event, context) => {
           body: ''
         };
       } else {
-        // console.log('URL not found for shortUrl:', shortUrl);
         return {
           statusCode: 404,
           headers,
@@ -184,7 +179,6 @@ exports.handler = async (event, context) => {
         };
       }
     } catch (error) {
-      // console.error('Error in GET handler:', error);
       return {
         statusCode: 500,
         headers,
