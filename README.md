@@ -6,7 +6,7 @@ A full-stack JavaScript URL shortener microservice similar to FreeCodeCamp's exa
 
 - ✅ Shorten URLs with a simple API
 - ✅ Redirect short URLs to original URLs
-- ✅ Validate URLs before processing
+- ✅ Advanced URL validation (format + DNS lookup)
 - ✅ Modern, responsive web interface
 - ✅ MongoDB database for persistence
 - ✅ Netlify deployment ready
@@ -38,6 +38,11 @@ A full-stack JavaScript URL shortener microservice similar to FreeCodeCamp's exa
   "error": "invalid url"
 }
 ```
+
+**Validation Details:**
+- URL format validation (must start with http:// or https://)
+- DNS lookup validation (domain must exist and be reachable)
+- Case-insensitive duplicate detection
 
 ### 2. Redirect to Original URL
 **GET** `/api/shorturl/:short_url`

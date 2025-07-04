@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Test redirect button handler
-    testRedirectBtn.addEventListener('click', async function() {
+    testRedirectBtn.addEventListener('click', function() {
         const shortUrl = shortUrlDisplay.value;
         
         if (!shortUrl) {
@@ -74,27 +74,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Show testing state
-        setTestingState(true);
-
-        try {
-            const response = await fetch(shortUrl, {
-                method: 'GET',
-                redirect: 'manual' // Don't follow redirects
-            });
-
-            if (response.status === 302) {
-                const location = response.headers.get('location');
-                showRedirectInfo(location);
-            } else {
-                showError(`Expected 302 redirect, got ${response.status}`);
-            }
-        } catch (error) {
-            console.error('Error testing redirect:', error);
-            showError('Failed to test redirect');
-        } finally {
-            setTestingState(false);
-        }
+        // Redirect directly to the short URL endpoint
+        window.location.href = shortUrl;
     });
 
     // Helper functions
@@ -116,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             testRedirectBtn.disabled = false;
             testRedirectBtn.classList.remove('testing');
-            testRedirectBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Test Redirect';
+            testRedirectBtn.innerHTML = '<i class="fas fa-external-link-alt"></i> Visit Short URL';
         }
     }
 

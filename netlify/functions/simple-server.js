@@ -1,8 +1,28 @@
 const validUrl = require('valid-url');
+const dns = require('dns');
+const { promisify } = require('util');
 
 // Simple in-memory storage
 let urls = [];
 let counter = 0;
+
+// Promisify dns.lookup for async/await usage
+const dnsLookup = promisify(dns.lookup);
+
+// DNS validation function
+async function validateUrlWithDNS(url) {
+  try {
+    const urlObj = new URL(url);
+    const hostname = urlObj.hostname;
+    
+    // Perform DNS lookup to verify the hostname exists
+    await dnsLookup(hostname);
+    return true;
+  } catch (error) {
+    console.log(`DNS validation failed for ${url}:`, error.message);
+    return false;
+  }
+}
 
 // Helper function to parse request body
 function parseBody(event) {
@@ -116,6 +136,17 @@ exports.handler = async (event, context) => {
       const urlPattern = /^https?:\/\/[^\s/$.?#].[^\s]*$/i;
       if (!urlPattern.test(url)) {
         console.log('Invalid URL detected:', url);
+        return {
+          statusCode: 200,
+          headers: { ...headers, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ error: 'invalid url' }),
+        };
+      }
+
+      // Validate URL with DNS lookup
+      const isDnsValid = await validateUrlWithDNS(url);
+      if (!isDnsValid) {
+        console.log('DNS validation failed for:', url);
         return {
           statusCode: 200,
           headers: { ...headers, 'Content-Type': 'application/json' },

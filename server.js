@@ -1,7 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 const validUrl = require('valid-url');
+const dns = require('dns');
+const { promisify } = require('util');
 require('dotenv').config();
+
+// Promisify dns.lookup for async/await usage
+const dnsLookup = promisify(dns.lookup);
 
 const app = express();
 
@@ -14,6 +19,21 @@ app.use(express.static('public'));
 // In-memory storage
 const urls = [];
 let urlCounter = 0;
+
+// DNS validation function
+async function validateUrlWithDNS(url) {
+  try {
+    const urlObj = new URL(url);
+    const hostname = urlObj.hostname;
+    
+    // Perform DNS lookup to verify the hostname exists
+    await dnsLookup(hostname);
+    return true;
+  } catch (error) {
+    console.log(`DNS validation failed for ${url}:`, error.message);
+    return false;
+  }
+}
 
 // Routes
 app.get('/', (req, res) => {
@@ -28,6 +48,12 @@ app.post('/api/shorturl', async (req, res) => {
     // Check if URL is valid (custom validation to preserve case)
     const urlPattern = /^https?:\/\/[^\s/$.?#].[^\s]*$/i;
     if (!urlPattern.test(url)) {
+      return res.json({ error: 'invalid url' });
+    }
+    
+    // Validate URL with DNS lookup
+    const isDnsValid = await validateUrlWithDNS(url);
+    if (!isDnsValid) {
       return res.json({ error: 'invalid url' });
     }
     
@@ -99,7 +125,7 @@ app.get('/api/shorturl', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 }); 
